@@ -4,9 +4,26 @@ const QuizAnswer = require("../models/QuizAnswer");
 // 1) ランダムクイズを取得
 exports.getRandomQuiz = async (req, res) => {
   try {
+    // データベース内の単語数を確認
+    const wordCount = await Word.countDocuments();
+    console.log(`📊 データベース内の単語数: ${wordCount}`);
+    
+    if (wordCount < 4) {
+      console.warn(`⚠️ 単語が不足しています。必要: 4個、現在: ${wordCount}個`);
+      return res.status(400).json({ 
+        message: `単語が不足しています。少なくとも4個の単語が必要です（現在: ${wordCount}個）。` 
+      });
+    }
+
     const words = await Word.aggregate([{ $sample: { size: 4 } }]);
-    if (words.length < 4)
-      return res.status(400).json({ message: "単語が不足しています。" });
+    console.log(`✅ ${words.length}個の単語を取得しました`);
+    
+    if (words.length < 4) {
+      console.warn(`⚠️ サンプリング結果が不足: ${words.length}個`);
+      return res.status(400).json({ 
+        message: `単語の取得に失敗しました（取得: ${words.length}個、必要: 4個）。` 
+      });
+    }
 
     const correctWord = words[Math.floor(Math.random() * 4)];
     const options = words.map((w) => w.desc);
@@ -14,14 +31,16 @@ exports.getRandomQuiz = async (req, res) => {
       .map((v) => ({ v, r: Math.random() }))
       .sort((a, b) => a.r - b.r)
       .map((x) => x.v);
+    
+    console.log(`✅ クイズ生成成功: ${correctWord.title}`);
     res.json({
       quizId: correctWord._id,
       question: `"${correctWord.title}"の意味は何ですか？`,
       options: shuffled,
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "サーバーエラーが発生しました。" });
+    console.error("❌ getRandomQuiz エラー:", err);
+    res.status(500).json({ message: "サーバーエラーが発生しました。", error: err.message });
   }
 };
 
