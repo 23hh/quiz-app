@@ -1,6 +1,10 @@
 # 📚 単語クイズアプリケーション  
 
+<<<<<<< HEAD
 👉 **デモはこちら**：[https://quiz-app-kappa-two-33.vercel.app/](https://quiz-app-kappa-two-33.vercel.app/)  
+=======
+👉 **デモはこちら**：[[https://ls23.up.railway.app/](https://quiz-app-kappa-two-33.vercel.app/)]([https://ls23.up.railway.app/](https://quiz-app-kappa-two-33.vercel.app/))  
+>>>>>>> ae863ddaae434af9f0f0896e8414c6dcc36fae2a
 
 🔐 **テスト用 管理者アカウント（採用担当者様向け）**  
 - メールアドレス：`admin@admin.com`  
