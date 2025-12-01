@@ -23,11 +23,20 @@ const state = reactive<State>({
 const router = useRouter();
 
 const submit = async () => {
-  const res = await httpLib.post("/v1/api/auth/join", state.form);
+  try {
+    const res = await httpLib.post("/v1/api/auth/join", state.form);
 
-  if (res.status === 201) {
-    window.alert(res.data.message);
-    router.push("/");
+    if (res.status === 201) {
+      window.alert(res.data.message);
+      router.push("/");
+    } else {
+      const message = res.data?.message || "会員登録に失敗しました。";
+      window.alert(message);
+    }
+  } catch (err: any) {
+    console.error("会員登録エラー:", err);
+    const message = err?.response?.data?.message || "会員登録に失敗しました。";
+    window.alert(message);
   }
 };
 </script>

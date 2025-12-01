@@ -25,21 +25,28 @@ const accountStore = useAccountStore();
 const router = useRouter();
 
 const submit = async () => {
-  const res = await httpLib.post("/v1/api/auth/login", state.form);
+  try {
+    const res = await httpLib.post("/v1/api/auth/login", state.form);
 
-  if (res.status === 200 && res.data.token) {
-    // ✅ 토큰 저장
-    const token = res.data.token;
+    if (res.status === 200 && res.data.token) {
+      // ✅ 토큰 저장
+      const token = res.data.token;
 
-    // 개발 환경에서는 secure: false
-    const isSecure = location.protocol === "https:";
-    cookieLib.set("token", token, 7, isSecure);
+      // 개발 환경에서는 secure: false
+      const isSecure = location.protocol === "https:";
+      cookieLib.set("token", token, 7, isSecure);
 
-    // ✅ 상태 반영
-    await accountStore.fetchInfo();
-    router.push("/");
-  } else {
-    window.alert("ログインに失敗しました：トークンがありません。");
+      // ✅ 상태 반영
+      await accountStore.fetchInfo();
+      router.push("/");
+    } else {
+      const message = res.data?.message || "ログインに失敗しました。";
+      window.alert(message);
+    }
+  } catch (err: any) {
+    console.error("ログインエラー:", err);
+    const message = err?.response?.data?.message || "ログインに失敗しました。";
+    window.alert(message);
   }
 };
 </script>
