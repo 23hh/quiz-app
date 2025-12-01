@@ -1,13 +1,34 @@
 <script setup lang="ts">
 import httpLib from "@/libs/httpLib";
+import cookieLib from "@/libs/cookieLib";
 import { useAccountStore } from "@/stores/account";
 
 const accountStore = useAccountStore();
 
 const logout = async () => {
-  const res = await httpLib.post("/v1/api/auth/logout");
+  try {
+    // バックエンドにログアウトリクエストを送信
+    const res = await httpLib.post("/v1/api/auth/logout");
 
-  if (res.status === 200) {
+    if (res.status === 200) {
+      // フロントエンドのクッキーからトークンを削除
+      cookieLib.del("token");
+      
+      // アカウントストアの状態をリセット
+      accountStore.loggedIn = false;
+      accountStore.userId = "";
+      accountStore.role = "";
+      
+      // ページをリロード
+      window.location.reload();
+    }
+  } catch (error) {
+    console.error("ログアウトエラー:", error);
+    // エラーが発生してもクッキーと状態をクリア
+    cookieLib.del("token");
+    accountStore.loggedIn = false;
+    accountStore.userId = "";
+    accountStore.role = "";
     window.location.reload();
   }
 };
@@ -50,6 +71,14 @@ const logout = async () => {
         <router-link class="btn btn-secondary" to="/my-answers">
           自分が解いたクイズ
         </router-link>
+        <template v-if="accountStore.loggedIn && accountStore.role === 'admin'">
+          <router-link class="btn btn-info" to="/admin/words">
+            単語管理
+          </router-link>
+          <router-link class="btn btn-success" to="/admin/word">
+            ＋単語追加
+          </router-link>
+        </template>
       </div>
       <hr />
     </div>

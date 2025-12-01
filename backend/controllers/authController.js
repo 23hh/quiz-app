@@ -18,10 +18,15 @@ exports.info = async (req, res) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   if (token) {
     try {
-      const decodedUser = jwt.verify(token, "your_jwt_secret");
-      res.status(200).send(decodedUser.userId);
+      const decodedUser = jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret");
+      res.status(200).json({
+        userId: decodedUser.userId,
+        role: decodedUser.role || "user"
+      });
       return;
-    } catch (e) {}
+    } catch (e) {
+      console.error("Token verification error:", e);
+    }
   }
 
   res.status(200).send(null);
